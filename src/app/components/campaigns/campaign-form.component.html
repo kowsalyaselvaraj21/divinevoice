@@ -1,0 +1,261 @@
+<div class="campaign-form-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>{{ isEditMode ? 'Edit Campaign' : 'Create New Campaign' }}</h1>
+      <p>{{ isEditMode ? 'Update your notification campaign settings' : 'Set up a new notification campaign for temple events' }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="onCancel()">
+        <span class="icon">❌</span>
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-spinner" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading campaign...</p>
+  </div>
+
+  <form [formGroup]="campaignForm" (ngSubmit)="onSubmit()" *ngIf="!loading" class="campaign-form">
+    <div class="form-sections">
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3>Basic Information</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Campaign Name *</label>
+            <input 
+              id="name"
+              type="text" 
+              formControlName="name"
+              placeholder="Enter campaign name"
+              [class.invalid]="isFieldInvalid('name')"
+            >
+            <div class="error-message" *ngIf="getFieldError('name')">
+              {{ getFieldError('name') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea 
+              id="description"
+              formControlName="description"
+              placeholder="Describe the purpose of this campaign"
+              rows="3"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="notificationType">Notification Type *</label>
+            <select 
+              id="notificationType"
+              formControlName="notificationType"
+              [class.invalid]="isFieldInvalid('notificationType')"
+            >
+              <option *ngFor="let type of notificationTypes" [value]="type.value">
+                {{ type.icon }} {{ type.label }}
+              </option>
+            </select>
+            <div class="error-message" *ngIf="getFieldError('notificationType')">
+              {{ getFieldError('notificationType') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message Content -->
+      <div class="form-section">
+        <h3>Message Content</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="messageContent">General Message *</label>
+            <textarea 
+              id="messageContent"
+              formControlName="messageContent"
+              placeholder="Enter the main message content"
+              rows="4"
+              [class.invalid]="isFieldInvalid('messageContent')"
+            ></textarea>
+            <div class="error-message" *ngIf="getFieldError('messageContent')">
+              {{ getFieldError('messageContent') }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Conditional fields based on notification type -->
+        <div class="form-row" *ngIf="campaignForm.get('notificationType')?.value === 'VOICE_CALL'">
+          <div class="form-group">
+            <label for="voiceMessageUrl">Voice Message URL *</label>
+            <input 
+              id="voiceMessageUrl"
+              type="url" 
+              formControlName="voiceMessageUrl"
+              placeholder="https://example.com/voice-message.mp3"
+              [class.invalid]="isFieldInvalid('voiceMessageUrl')"
+            >
+            <div class="error-message" *ngIf="getFieldError('voiceMessageUrl')">
+              {{ getFieldError('voiceMessageUrl') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="campaignForm.get('notificationType')?.value === 'EMAIL'">
+          <div class="form-group">
+            <label for="emailSubject">Email Subject *</label>
+            <input 
+              id="emailSubject"
+              type="text" 
+              formControlName="emailSubject"
+              placeholder="Enter email subject"
+              [class.invalid]="isFieldInvalid('emailSubject')"
+            >
+            <div class="error-message" *ngIf="getFieldError('emailSubject')">
+              {{ getFieldError('emailSubject') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="campaignForm.get('notificationType')?.value === 'EMAIL'">
+          <div class="form-group">
+            <label for="emailBody">Email Body *</label>
+            <textarea 
+              id="emailBody"
+              formControlName="emailBody"
+              placeholder="Enter email body content"
+              rows="6"
+              [class.invalid]="isFieldInvalid('emailBody')"
+            ></textarea>
+            <div class="error-message" *ngIf="getFieldError('emailBody')">
+              {{ getFieldError('emailBody') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="campaignForm.get('notificationType')?.value === 'SMS'">
+          <div class="form-group">
+            <label for="smsMessage">SMS Message *</label>
+            <textarea 
+              id="smsMessage"
+              formControlName="smsMessage"
+              placeholder="Enter SMS message (max 160 characters)"
+              rows="3"
+              [class.invalid]="isFieldInvalid('smsMessage')"
+            ></textarea>
+            <div class="error-message" *ngIf="getFieldError('smsMessage')">
+              {{ getFieldError('smsMessage') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="campaignForm.get('notificationType')?.value === 'WHATSAPP'">
+          <div class="form-group">
+            <label for="whatsappMessage">WhatsApp Message *</label>
+            <textarea 
+              id="whatsappMessage"
+              formControlName="whatsappMessage"
+              placeholder="Enter WhatsApp message"
+              rows="4"
+              [class.invalid]="isFieldInvalid('whatsappMessage')"
+            ></textarea>
+            <div class="error-message" *ngIf="getFieldError('whatsappMessage')">
+              {{ getFieldError('whatsappMessage') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scheduling -->
+      <div class="form-section">
+        <h3>Scheduling</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="scheduledTime">Scheduled Time</label>
+            <input 
+              id="scheduledTime"
+              type="datetime-local" 
+              formControlName="scheduledTime"
+              placeholder="Leave empty to send immediately"
+            >
+            <small class="help-text">Leave empty to send immediately, or set a future time to schedule</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Retry Settings -->
+      <div class="form-section">
+        <h3>Retry Settings</h3>
+        <div class="form-row">
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                formControlName="retryEnabled"
+              >
+              <span class="checkmark"></span>
+              Enable retry for failed notifications
+            </label>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="campaignForm.get('retryEnabled')?.value">
+          <div class="form-group">
+            <label for="maxRetryAttempts">Maximum Retry Attempts</label>
+            <input 
+              id="maxRetryAttempts"
+              type="number" 
+              formControlName="maxRetryAttempts"
+              min="1"
+              max="10"
+              [class.invalid]="isFieldInvalid('maxRetryAttempts')"
+            >
+            <div class="error-message" *ngIf="getFieldError('maxRetryAttempts')">
+              {{ getFieldError('maxRetryAttempts') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="retryDelayMinutes">Retry Delay (minutes)</label>
+            <input 
+              id="retryDelayMinutes"
+              type="number" 
+              formControlName="retryDelayMinutes"
+              min="1"
+              max="60"
+              [class.invalid]="isFieldInvalid('retryDelayMinutes')"
+            >
+            <div class="error-message" *ngIf="getFieldError('retryDelayMinutes')">
+              {{ getFieldError('retryDelayMinutes') }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button 
+        type="button" 
+        class="btn-secondary" 
+        (click)="onCancel()"
+        [disabled]="submitting"
+      >
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        class="btn-primary"
+        [disabled]="campaignForm.invalid || submitting"
+      >
+        <span class="icon" *ngIf="submitting">⏳</span>
+        <span class="icon" *ngIf="!submitting">💾</span>
+        {{ submitting ? 'Saving...' : (isEditMode ? 'Update Campaign' : 'Create Campaign') }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,160 @@
+<div class="devotee-form-container">
+  <div class="form-header">
+    <div class="header-content">
+      <h1>{{ isEditMode ? 'Edit Devotee' : 'Add New Devotee' }}</h1>
+      <p>{{ isEditMode ? 'Update devotee information' : 'Add a new devotee to your temple database' }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="onCancel()">
+        <span class="icon">↩️</span>
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading-spinner" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading devotee information...</p>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="devoteeForm" (ngSubmit)="onSubmit()" *ngIf="!loading" class="devotee-form">
+    <div class="form-grid">
+      <!-- Basic Information Section -->
+      <div class="form-section">
+        <h3>Basic Information</h3>
+        
+        <div class="form-group">
+          <label for="name" class="required">Full Name</label>
+          <input 
+            type="text" 
+            id="name"
+            formControlName="name"
+            placeholder="Enter devotee's full name"
+            [class.error]="isFieldInvalid('name')"
+          >
+          <div class="error-message" *ngIf="getFieldError('name')">
+            {{ getFieldError('name') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber" class="required">Phone Number</label>
+          <input 
+            type="tel" 
+            id="phoneNumber"
+            formControlName="phoneNumber"
+            placeholder="+91 9876543210"
+            [class.error]="isFieldInvalid('phoneNumber')"
+          >
+          <div class="error-message" *ngIf="getFieldError('phoneNumber')">
+            {{ getFieldError('phoneNumber') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input 
+            type="email" 
+            id="email"
+            formControlName="email"
+            placeholder="devotee@example.com"
+            [class.error]="isFieldInvalid('email')"
+          >
+          <div class="error-message" *ngIf="getFieldError('email')">
+            {{ getFieldError('email') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Address</label>
+          <textarea 
+            id="address"
+            formControlName="address"
+            placeholder="Enter devotee's address"
+            rows="3"
+            [class.error]="isFieldInvalid('address')"
+          ></textarea>
+          <div class="error-message" *ngIf="getFieldError('address')">
+            {{ getFieldError('address') }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Preferences Section -->
+      <div class="form-section">
+        <h3>Preferences</h3>
+        
+        <div class="form-group">
+          <label for="preferredLanguage" class="required">Preferred Language</label>
+          <select 
+            id="preferredLanguage"
+            formControlName="preferredLanguage"
+            [class.error]="isFieldInvalid('preferredLanguage')"
+          >
+            <option *ngFor="let lang of languages" [value]="lang.value">
+              {{ lang.label }}
+            </option>
+          </select>
+          <div class="error-message" *ngIf="getFieldError('preferredLanguage')">
+            {{ getFieldError('preferredLanguage') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="notificationPreference" class="required">Notification Preference</label>
+          <div class="radio-group">
+            <label 
+              *ngFor="let pref of notificationPreferences" 
+              class="radio-option"
+              [class.selected]="devoteeForm.get('notificationPreference')?.value === pref.value"
+            >
+              <input 
+                type="radio" 
+                [value]="pref.value"
+                formControlName="notificationPreference"
+                [id]="'pref-' + pref.value"
+              >
+              <span class="radio-custom">
+                <span class="icon">{{ pref.icon }}</span>
+                <span class="label">{{ pref.label }}</span>
+              </span>
+            </label>
+          </div>
+          <div class="error-message" *ngIf="getFieldError('notificationPreference')">
+            {{ getFieldError('notificationPreference') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              formControlName="isActive"
+            >
+            <span class="checkbox-custom"></span>
+            Active Status
+            <small>Uncheck to deactivate this devotee</small>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="onCancel()">
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        class="btn-primary"
+        [disabled]="submitting || devoteeForm.invalid"
+      >
+        <span class="spinner-small" *ngIf="submitting"></span>
+        <span class="icon" *ngIf="!submitting">{{ isEditMode ? '💾' : '➕' }}</span>
+        {{ submitting ? 'Saving...' : (isEditMode ? 'Update Devotee' : 'Add Devotee') }}
+      </button>
+    </div>
+  </form>
+</div>

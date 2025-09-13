@@ -1,0 +1,212 @@
+<div class="campaign-detail-container">
+  <div class="page-header">
+    <div class="header-content">
+      <button class="btn-back" (click)="onBack()">
+        <span class="icon">←</span>
+        Back to Campaigns
+      </button>
+      <h1>Campaign Details</h1>
+      <p *ngIf="campaign">View and manage campaign: {{ campaign.name }}</p>
+    </div>
+    <div class="header-actions" *ngIf="campaign">
+      <button 
+        class="btn-success" 
+        *ngIf="canExecute()"
+        (click)="executeCampaign()"
+        [disabled]="executing"
+      >
+        <span class="icon" *ngIf="executing">⏳</span>
+        <span class="icon" *ngIf="!executing">▶️</span>
+        {{ executing ? 'Executing...' : 'Execute Now' }}
+      </button>
+      
+      <button 
+        class="btn-info" 
+        *ngIf="canSchedule()"
+        (click)="scheduleCampaign()"
+        [disabled]="executing"
+      >
+        <span class="icon" *ngIf="executing">⏳</span>
+        <span class="icon" *ngIf="!executing">📅</span>
+        {{ executing ? 'Scheduling...' : 'Schedule' }}
+      </button>
+      
+      <button 
+        class="btn-warning" 
+        *ngIf="canCancel()"
+        (click)="cancelCampaign()"
+        [disabled]="cancelling"
+      >
+        <span class="icon" *ngIf="cancelling">⏳</span>
+        <span class="icon" *ngIf="!cancelling">⏹️</span>
+        {{ cancelling ? 'Cancelling...' : 'Cancel' }}
+      </button>
+      
+      <button class="btn-secondary" (click)="onEdit()">
+        <span class="icon">✏️</span>
+        Edit
+      </button>
+      
+      <button 
+        class="btn-danger" 
+        *ngIf="canDelete()"
+        (click)="deleteCampaign()"
+      >
+        <span class="icon">🗑️</span>
+        Delete
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-spinner" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading campaign details...</p>
+  </div>
+
+  <div class="campaign-content" *ngIf="!loading && campaign">
+    <!-- Campaign Overview -->
+    <div class="campaign-overview">
+      <div class="overview-card">
+        <div class="card-header">
+          <h3>Campaign Overview</h3>
+        </div>
+        <div class="card-content">
+          <div class="overview-item">
+            <span class="label">Name:</span>
+            <span class="value">{{ campaign.name }}</span>
+          </div>
+          <div class="overview-item" *ngIf="campaign.description">
+            <span class="label">Description:</span>
+            <span class="value">{{ campaign.description }}</span>
+          </div>
+          <div class="overview-item">
+            <span class="label">Type:</span>
+            <span class="value">
+              <span class="notification-type">
+                <span class="icon">{{ getNotificationTypeIcon(campaign.notificationType) }}</span>
+                {{ campaign.notificationType }}
+              </span>
+            </span>
+          </div>
+          <div class="overview-item">
+            <span class="label">Status:</span>
+            <span class="value">
+              <span class="status-badge" [class]="getStatusBadgeClass(campaign.status)">
+                {{ campaign.status }}
+              </span>
+            </span>
+          </div>
+          <div class="overview-item" *ngIf="campaign.scheduledTime">
+            <span class="label">Scheduled Time:</span>
+            <span class="value">{{ formatDate(campaign.scheduledTime) }}</span>
+          </div>
+          <div class="overview-item">
+            <span class="label">Created:</span>
+            <span class="value">{{ formatDate(campaign.createdAt) }}</span>
+          </div>
+          <div class="overview-item" *ngIf="campaign.updatedAt">
+            <span class="label">Last Updated:</span>
+            <span class="value">{{ formatDate(campaign.updatedAt) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message Content -->
+    <div class="message-section">
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Message Content</h3>
+        </div>
+        <div class="card-content">
+          <div class="message-item">
+            <span class="label">General Message:</span>
+            <div class="message-content">{{ campaign.messageContent }}</div>
+          </div>
+          
+          <div class="message-item" *ngIf="campaign.notificationType === 'VOICE_CALL' && campaign.voiceMessageUrl">
+            <span class="label">Voice Message URL:</span>
+            <div class="message-content">
+              <a [href]="campaign.voiceMessageUrl" target="_blank" class="link">
+                {{ campaign.voiceMessageUrl }}
+              </a>
+            </div>
+          </div>
+          
+          <div class="message-item" *ngIf="campaign.notificationType === 'EMAIL' && campaign.emailSubject">
+            <span class="label">Email Subject:</span>
+            <div class="message-content">{{ campaign.emailSubject }}</div>
+          </div>
+          
+          <div class="message-item" *ngIf="campaign.notificationType === 'EMAIL' && campaign.emailBody">
+            <span class="label">Email Body:</span>
+            <div class="message-content">{{ campaign.emailBody }}</div>
+          </div>
+          
+          <div class="message-item" *ngIf="campaign.notificationType === 'SMS' && campaign.smsMessage">
+            <span class="label">SMS Message:</span>
+            <div class="message-content">{{ campaign.smsMessage }}</div>
+          </div>
+          
+          <div class="message-item" *ngIf="campaign.notificationType === 'WHATSAPP' && campaign.whatsappMessage">
+            <span class="label">WhatsApp Message:</span>
+            <div class="message-content">{{ campaign.whatsappMessage }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Retry Settings -->
+    <div class="retry-section" *ngIf="campaign.retryEnabled">
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Retry Settings</h3>
+        </div>
+        <div class="card-content">
+          <div class="retry-item">
+            <span class="label">Retry Enabled:</span>
+            <span class="value">
+              <span class="status-badge success">Yes</span>
+            </span>
+          </div>
+          <div class="retry-item">
+            <span class="label">Maximum Retry Attempts:</span>
+            <span class="value">{{ campaign.maxRetryAttempts }}</span>
+          </div>
+          <div class="retry-item">
+            <span class="label">Retry Delay:</span>
+            <span class="value">{{ campaign.retryDelayMinutes }} minutes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message Preview -->
+    <div class="preview-section">
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Message Preview</h3>
+        </div>
+        <div class="card-content">
+          <div class="preview-content">
+            <div class="preview-header">
+              <span class="icon">{{ getNotificationTypeIcon(campaign.notificationType) }}</span>
+              <span class="preview-title">{{ campaign.notificationType }} Message</span>
+            </div>
+            <div class="preview-body">
+              {{ getMessagePreview() }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="!loading && !campaign">
+    <div class="error-icon">❌</div>
+    <h3>Campaign Not Found</h3>
+    <p>The campaign you're looking for doesn't exist or has been deleted.</p>
+    <button class="btn-primary" (click)="onBack()">Back to Campaigns</button>
+  </div>
+</div>

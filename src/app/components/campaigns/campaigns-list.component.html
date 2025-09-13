@@ -1,0 +1,220 @@
+<div class="campaigns-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Notification Campaigns</h1>
+      <p>Create and manage notification campaigns for temple events</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" routerLink="add">
+        <span class="icon">📢</span>
+        Create Campaign
+      </button>
+      <button class="btn-secondary" routerLink="templates">
+        <span class="icon">📋</span>
+        Templates
+      </button>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="search-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        placeholder="Search campaigns by name or description..."
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="searchCampaigns()"
+      >
+      <button class="search-btn" (click)="searchCampaigns()">
+        <span class="icon">🔍</span>
+      </button>
+    </div>
+    
+    <div class="filters">
+      <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+        <option value="">All Status</option>
+        <option value="DRAFT">Draft</option>
+        <option value="SCHEDULED">Scheduled</option>
+        <option value="RUNNING">Running</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="FAILED">Failed</option>
+        <option value="CANCELLED">Cancelled</option>
+      </select>
+      
+      <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+        <option value="">All Types</option>
+        <option value="VOICE_CALL">Voice Call</option>
+        <option value="SMS">SMS</option>
+        <option value="WHATSAPP">WhatsApp</option>
+        <option value="EMAIL">Email</option>
+        <option value="MULTI_CHANNEL">Multi Channel</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Bulk Actions -->
+  <div class="bulk-actions" *ngIf="selectedCampaigns.length > 0">
+    <div class="bulk-info">
+      <span>{{ selectedCampaigns.length }} campaigns selected</span>
+    </div>
+    <div class="bulk-buttons">
+      <button class="btn-secondary" (click)="selectAll()">
+        {{ selectedCampaigns.length === campaigns.length ? 'Deselect All' : 'Select All' }}
+      </button>
+      <button class="btn-success" (click)="executeSelected()">
+        <span class="icon">▶️</span>
+        Execute Selected
+      </button>
+      <button class="btn-danger" (click)="deleteSelected()">
+        <span class="icon">🗑️</span>
+        Delete Selected
+      </button>
+    </div>
+  </div>
+
+  <!-- Campaigns Table -->
+  <div class="table-container">
+    <div class="loading-spinner" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading campaigns...</p>
+    </div>
+
+    <table class="campaigns-table" *ngIf="!loading && campaigns.length > 0">
+      <thead>
+        <tr>
+          <th>
+            <input 
+              type="checkbox" 
+              [checked]="selectedCampaigns.length === campaigns.length"
+              (change)="selectAll()"
+            >
+          </th>
+          <th>Campaign Name</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Scheduled Time</th>
+          <th>Message Preview</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let campaign of campaigns" [class.selected]="selectedCampaigns.includes(campaign.id!)">
+          <td>
+            <input 
+              type="checkbox" 
+              [checked]="selectedCampaigns.includes(campaign.id!)"
+              (change)="toggleSelection(campaign.id!)"
+            >
+          </td>
+          <td>
+            <div class="campaign-name">
+              <strong>{{ campaign.name }}</strong>
+              <span class="description" *ngIf="campaign.description">{{ campaign.description }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="notification-type">
+              <span class="icon">{{ getNotificationTypeIcon(campaign.notificationType) }}</span>
+              {{ campaign.notificationType }}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge" [class]="getStatusBadgeClass(campaign.status)">
+              {{ campaign.status }}
+            </span>
+          </td>
+          <td>
+            <span *ngIf="campaign.scheduledTime">{{ campaign.scheduledTime | date:'medium' }}</span>
+            <span *ngIf="!campaign.scheduledTime">-</span>
+          </td>
+          <td>
+            <div class="message-preview">
+              <span class="preview-text">{{ getMessagePreview(campaign) }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button 
+                class="btn-icon success" 
+                *ngIf="campaign.status === 'DRAFT'"
+                (click)="executeCampaign(campaign.id!)" 
+                title="Execute Now"
+              >
+                <span class="icon">▶️</span>
+              </button>
+              <button 
+                class="btn-icon info" 
+                *ngIf="campaign.status === 'DRAFT'"
+                (click)="scheduleCampaign(campaign.id!)" 
+                title="Schedule"
+              >
+                <span class="icon">📅</span>
+              </button>
+              <button 
+                class="btn-icon warning" 
+                *ngIf="campaign.status === 'SCHEDULED' || campaign.status === 'RUNNING'"
+                (click)="cancelCampaign(campaign.id!)" 
+                title="Cancel"
+              >
+                <span class="icon">⏹️</span>
+              </button>
+              <button class="btn-icon" [routerLink]="['edit', campaign.id]" title="Edit">
+                <span class="icon">✏️</span>
+              </button>
+              <button class="btn-icon" [routerLink]="[campaign.id]" title="View Details">
+                <span class="icon">👁️</span>
+              </button>
+              <button class="btn-icon danger" (click)="deleteCampaign(campaign.id!)" title="Delete">
+                <span class="icon">🗑️</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && campaigns.length === 0">
+      <div class="empty-icon">📢</div>
+      <h3>No campaigns found</h3>
+      <p>Start by creating your first notification campaign</p>
+      <button class="btn-primary" routerLink="add">Create First Campaign</button>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button 
+      class="page-btn" 
+      [disabled]="currentPage === 0"
+      (click)="onPageChange(currentPage - 1)"
+    >
+      Previous
+    </button>
+    
+    <div class="page-numbers">
+      <button 
+        class="page-btn" 
+        *ngFor="let page of getPageNumbers()"
+        [class.active]="page === currentPage"
+        (click)="onPageChange(page)"
+      >
+        {{ page + 1 }}
+      </button>
+    </div>
+    
+    <button 
+      class="page-btn" 
+      [disabled]="currentPage === totalPages - 1"
+      (click)="onPageChange(currentPage + 1)"
+    >
+      Next
+    </button>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary">
+    <p>Showing {{ campaigns.length }} of {{ totalElements }} campaigns</p>
+  </div>
+</div>
+

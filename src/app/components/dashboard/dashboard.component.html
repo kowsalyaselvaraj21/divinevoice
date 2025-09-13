@@ -1,0 +1,128 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <p>Welcome to the Temple Notification System</p>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <span class="icon">👥</span>
+      </div>
+      <div class="stat-content">
+        <h3>{{ (activeDevoteesCount$ | async) || 0 }}</h3>
+        <p>Active Devotees</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <span class="icon">📢</span>
+      </div>
+      <div class="stat-content">
+        <h3>{{ (activeCampaigns$ | async)?.length || 0 }}</h3>
+        <p>Active Campaigns</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <span class="icon">📋</span>
+      </div>
+      <div class="stat-content">
+        <h3>{{ (totalNotifications$ | async) || 0 }}</h3>
+        <p>Total Notifications</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <span class="icon">✅</span>
+      </div>
+      <div class="stat-content">
+        <h3>{{ (deliveredNotifications$ | async) || 0 }}</h3>
+        <p>Delivered</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activities -->
+  <div class="activities-grid">
+    <!-- Recent Devotees -->
+    <div class="activity-card">
+      <div class="card-header">
+        <h2>Recent Devotees</h2>
+        <button class="btn-primary" routerLink="/devotees">View All</button>
+      </div>
+      <div class="card-content">
+        <div *ngIf="(recentDevotees$ | async)?.content as devotees; else loadingDevotees">
+          <div class="devotee-item" *ngFor="let devotee of devotees">
+            <div class="devotee-info">
+              <h4>{{ devotee.name }}</h4>
+              <p>{{ devotee.phoneNumber }}</p>
+            </div>
+            <div class="devotee-status">
+              <span class="status-badge" [class.active]="devotee.isActive">
+                {{ devotee.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <ng-template #loadingDevotees>
+          <div class="loading">Loading devotees...</div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Recent Campaigns -->
+    <div class="activity-card">
+      <div class="card-header">
+        <h2>Recent Campaigns</h2>
+        <button class="btn-primary" routerLink="/campaigns">View All</button>
+      </div>
+      <div class="card-content">
+        <div *ngIf="(recentCampaigns$ | async)?.content as campaigns; else loadingCampaigns">
+          <div class="campaign-item" *ngFor="let campaign of campaigns">
+            <div class="campaign-info">
+              <h4>{{ campaign.name }}</h4>
+              <p>{{ campaign.description }}</p>
+            </div>
+            <div class="campaign-status">
+              <span class="status-badge" [class]="getStatusColor(campaign.status)">
+                {{ campaign.status }}
+              </span>
+              <span class="type-icon">{{ getNotificationTypeIcon(campaign.notificationType) }}</span>
+            </div>
+          </div>
+        </div>
+        <ng-template #loadingCampaigns>
+          <div class="loading">Loading campaigns...</div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="actions-grid">
+      <button class="action-btn" routerLink="/devotees/add">
+        <span class="icon">➕</span>
+        <span>Add Devotee</span>
+      </button>
+      <button class="action-btn" routerLink="/campaigns/add">
+        <span class="icon">📢</span>
+        <span>Create Campaign</span>
+      </button>
+      <button class="action-btn" routerLink="/logs">
+        <span class="icon">📋</span>
+        <span>View Logs</span>
+      </button>
+      <button class="action-btn" routerLink="/analytics">
+        <span class="icon">📊</span>
+        <span>Analytics</span>
+      </button>
+    </div>
+  </div>
+</div>

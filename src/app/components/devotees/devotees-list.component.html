@@ -1,0 +1,183 @@
+<div class="devotees-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Devotees Management</h1>
+      <p>Manage your temple devotees and their notification preferences</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" routerLink="add">
+        <span class="icon">➕</span>
+        Add Devotee
+      </button>
+      <button class="btn-secondary" (click)="showBulkImport = true">
+        <span class="icon">📥</span>
+        Bulk Import
+      </button>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="search-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        placeholder="Search devotees by name, phone, or email..."
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="searchDevotees()"
+      >
+      <button class="search-btn" (click)="searchDevotees()">
+        <span class="icon">🔍</span>
+      </button>
+    </div>
+    
+    <div class="filters">
+      <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+        <option value="">All Status</option>
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+      </select>
+      
+      <select [(ngModel)]="notificationFilter" (change)="applyFilters()">
+        <option value="">All Notification Types</option>
+        <option value="VOICE_CALL">Voice Call</option>
+        <option value="SMS">SMS</option>
+        <option value="WHATSAPP">WhatsApp</option>
+        <option value="EMAIL">Email</option>
+        <option value="ALL">All</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Bulk Actions -->
+  <div class="bulk-actions" *ngIf="selectedDevotees.length > 0">
+    <div class="bulk-info">
+      <span>{{ selectedDevotees.length }} devotees selected</span>
+    </div>
+    <div class="bulk-buttons">
+      <button class="btn-secondary" (click)="selectAll()">
+        {{ selectedDevotees.length === devotees.length ? 'Deselect All' : 'Select All' }}
+      </button>
+      <button class="btn-danger" (click)="deleteSelected()">
+        <span class="icon">🗑️</span>
+        Delete Selected
+      </button>
+    </div>
+  </div>
+
+  <!-- Devotees Table -->
+  <div class="table-container">
+    <div class="loading-spinner" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading devotees...</p>
+    </div>
+
+    <table class="devotees-table" *ngIf="!loading && devotees.length > 0">
+      <thead>
+        <tr>
+          <th>
+            <input 
+              type="checkbox" 
+              [checked]="selectedDevotees.length === devotees.length"
+              (change)="selectAll()"
+            >
+          </th>
+          <th>Name</th>
+          <th>Phone Number</th>
+          <th>Email</th>
+          <th>Language</th>
+          <th>Notification Preference</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let devotee of devotees" [class.selected]="selectedDevotees.includes(devotee.id!)">
+          <td>
+            <input 
+              type="checkbox" 
+              [checked]="selectedDevotees.includes(devotee.id!)"
+              (change)="toggleSelection(devotee.id!)"
+            >
+          </td>
+          <td>
+            <div class="devotee-name">
+              <strong>{{ devotee.name }}</strong>
+              <span class="address" *ngIf="devotee.address">{{ devotee.address }}</span>
+            </div>
+          </td>
+          <td>{{ devotee.phoneNumber }}</td>
+          <td>{{ devotee.email || '-' }}</td>
+          <td>{{ devotee.preferredLanguage || 'English' }}</td>
+          <td>
+            <span class="notification-type">
+              <span class="icon">{{ getNotificationTypeIcon(devotee.notificationPreference) }}</span>
+              {{ devotee.notificationPreference }}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge" [class]="getStatusBadgeClass(devotee.isActive)">
+              {{ devotee.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon" [routerLink]="['edit', devotee.id]" title="Edit">
+                <span class="icon">✏️</span>
+              </button>
+              <button class="btn-icon" [routerLink]="['view', devotee.id]" title="View Details">
+                <span class="icon">👁️</span>
+              </button>
+              <button class="btn-icon danger" (click)="deleteDevotee(devotee.id!)" title="Delete">
+                <span class="icon">🗑️</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && devotees.length === 0">
+      <div class="empty-icon">👥</div>
+      <h3>No devotees found</h3>
+      <p>Start by adding your first devotee to the system</p>
+      <button class="btn-primary" routerLink="add">Add First Devotee</button>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button 
+      class="page-btn" 
+      [disabled]="currentPage === 0"
+      (click)="onPageChange(currentPage - 1)"
+    >
+      Previous
+    </button>
+    
+    <div class="page-numbers">
+      <button 
+        class="page-btn" 
+        *ngFor="let page of getPageNumbers()"
+        [class.active]="page === currentPage"
+        (click)="onPageChange(page)"
+      >
+        {{ page + 1 }}
+      </button>
+    </div>
+    
+    <button 
+      class="page-btn" 
+      [disabled]="currentPage === totalPages - 1"
+      (click)="onPageChange(currentPage + 1)"
+    >
+      Next
+    </button>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary">
+    <p>Showing {{ devotees.length }} of {{ totalElements }} devotees</p>
+  </div>
+</div>
+

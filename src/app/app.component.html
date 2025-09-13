@@ -1,0 +1,55 @@
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="icon">🏛️</span>
+        </div>
+        <h1 class="app-title">Temple Notification System</h1>
+      </div>
+      
+      <nav class="nav-menu">
+        <a routerLink="/dashboard" routerLinkActive="active">
+          <span class="icon">📊</span>
+          Dashboard
+        </a>
+        <a routerLink="/devotees" routerLinkActive="active">
+          <span class="icon">👥</span>
+          Devotees
+        </a>
+        <a routerLink="/campaigns" routerLinkActive="active">
+          <span class="icon">📢</span>
+          Campaigns
+        </a>
+        <a routerLink="/logs" routerLinkActive="active">
+          <span class="icon">📋</span>
+          Logs
+        </a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="user-menu-btn">
+          <span class="icon">👤</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p>&copy; 2024 Temple Notification System. Built with ❤️ for spiritual communities.</p>
+      <div class="footer-links">
+        <a href="#" class="footer-link">Privacy Policy</a>
+        <a href="#" class="footer-link">Terms of Service</a>
+        <a href="#" class="footer-link">Support</a>
+      </div>
+    </div>
+  </footer>
+</div>
